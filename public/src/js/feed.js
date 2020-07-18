@@ -1,16 +1,17 @@
 var shareImageButton = document.querySelector('#share-image-button');
 var createPostArea = document.querySelector('#create-post');
 var closeCreatePostModalButton = document.querySelector('#close-create-post-modal-btn');
+var sharedMomentsArea = document.querySelector('#shared-moments');
 
 function openCreatePostModal() {
   createPostArea.style.display = 'block';
   if (deferredPrompt) {
     deferredPrompt.prompt();
 
-    deferredPrompt.userChoice.then(function(choice) {
-      console.log(choice.outcome);
+    deferredPrompt.userChoice.then(function(choiceResult) {
+      console.log(choiceResult.outcome);
 
-      if (choice.outcome === 'dismissed') {
+      if (choiceResult.outcome === 'dismissed') {
         console.log('User cancelled installation');
       } else {
         console.log('User added to home screen');
