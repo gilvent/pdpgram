@@ -20,6 +20,15 @@ function openCreatePostModal() {
 
     deferredPrompt = null;
   }
+
+  // if ('serviceWorker' in navigator) {
+  //   navigator.serviceWorker.getRegistrations()
+  //     .then(registrations => {
+  //       for(let registration of registrations) {
+  //         registration.unregister();
+  //       }
+  //     })
+  // }
 }
 
 function closeCreatePostModal() {
@@ -39,6 +48,12 @@ function onSaveButtonClicked(event) {
         cache.add('https://httpbin.org/get');
         cache.add('/src/images/sf-boat.jpg');
       });
+  }
+}
+
+function clearCards() {
+  while(sharedMomentsArea.hasChildNodes()) {
+    sharedMomentsArea.removeChild(sharedMomentsArea.lastChild);
   }
 }
 
@@ -69,10 +84,43 @@ function createCard() {
   sharedMomentsArea.appendChild(cardWrapper);
 }
 
-fetch('https://httpbin.org/get')
+let url = 'https://httpbin.org/post'
+let isFetchedNetworkData = false;
+
+fetch(url, {
+  method: 'POST',
+  headers: { 
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  },
+  body: JSON.stringify({
+    message: 'Some message'
+  })
+})
   .then(function(res) {
     return res.json();
   })
   .then(function(data) {
+    isFetchedNetworkData = true;
+    console.log('From web', data);
+    clearCards();
     createCard();
   });
+
+
+if ('caches' in window) {
+  caches.match(url)
+    .then(function(response) {
+      if (response) {
+        return response.json();
+      }
+    })
+    .then(function(data) {
+      console.log('From cache', data);
+      if (!isFetchedNetworkData) {
+        clearCards();
+        createCard();
+      }
+    })
+}
+
