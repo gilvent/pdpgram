@@ -57,23 +57,23 @@ function clearCards() {
   }
 }
 
-function createCard() {
+function createCard(data) {
   var cardWrapper = document.createElement('div');
   cardWrapper.className = 'shared-moment-card mdl-card mdl-shadow--2dp';
   var cardTitle = document.createElement('div');
   cardTitle.className = 'mdl-card__title';
-  cardTitle.style.backgroundImage = 'url("/src/images/sf-boat.jpg")';
+  cardTitle.style.backgroundImage = `url('${data.image}')`;
   cardTitle.style.backgroundSize = 'cover';
   cardTitle.style.height = '180px';
   cardWrapper.appendChild(cardTitle);
   var cardTitleTextElement = document.createElement('h2');
   cardTitleTextElement.style.color = 'white';
   cardTitleTextElement.className = 'mdl-card__title-text';
-  cardTitleTextElement.textContent = 'San Francisco Trip';
+  cardTitleTextElement.textContent = data.title;
   cardTitle.appendChild(cardTitleTextElement);
   var cardSupportingText = document.createElement('div');
   cardSupportingText.className = 'mdl-card__supporting-text';
-  cardSupportingText.textContent = 'In San Francisco';
+  cardSupportingText.textContent = data.location;
   cardSupportingText.style.textAlign = 'center';
   // var cardSaveButton = document.createElement('button');
   // cardSaveButton.textContent = 'Save';
@@ -84,27 +84,27 @@ function createCard() {
   sharedMomentsArea.appendChild(cardWrapper);
 }
 
-let url = 'https://httpbin.org/post'
+function updateUI(data) {
+  clearCards();
+  for (let d of data) {
+    createCard(d);
+  }
+}
+
+let url = 'https://pdpgram.firebaseio.com/posts.json';
 let isFetchedNetworkData = false;
 
-fetch(url, {
-  method: 'POST',
-  headers: { 
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-  },
-  body: JSON.stringify({
-    message: 'Some message'
-  })
-})
+fetch(url)
   .then(function(res) {
     return res.json();
   })
   .then(function(data) {
     isFetchedNetworkData = true;
     console.log('From web', data);
-    clearCards();
-    createCard();
+    const dataArray = Object.keys(data).reduce((arr, dataKey) => {
+      return [...arr, data[dataKey]];
+    }, []);
+    updateUI(dataArray);
   });
 
 
@@ -118,8 +118,10 @@ if ('caches' in window) {
     .then(function(data) {
       console.log('From cache', data);
       if (!isFetchedNetworkData) {
-        clearCards();
-        createCard();
+        const dataArray = Object.keys(data).reduce((arr, dataKey) => {
+          return [...arr, data[dataKey]];
+        }, []);
+        updateUI(dataArray);
       }
     })
 }

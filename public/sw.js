@@ -62,7 +62,7 @@ self.addEventListener('activate', function(event) {
  * Cache Strategy: Cache then network
  */
 self.addEventListener('fetch', function(event) {
-  const url = 'https://httpbin.org/get';
+  const url = 'https://pdpgram.firebaseio.com/posts';
   
   if (event.request.url.includes(url)) {
     event.respondWith(
