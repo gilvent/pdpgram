@@ -1,4 +1,7 @@
-let CACHE_STATIC_NAME = 'static-v15';
+importScripts('/src/js/idb.js');
+importScripts('/src/js/utility.js');
+
+let CACHE_STATIC_NAME = 'static-v16';
 let CACHE_DYNAMIC_NAME = 'dynamic-v2';
 let STATIC_FILES = [
   '/',
@@ -6,6 +9,7 @@ let STATIC_FILES = [
   '/offline.html',
   '/src/js/app.js',
   '/src/js/feed.js',
+  '/src/js/idb.js',
   '/src/js/promise.js',
   '/src/js/fetch.js',
   '/src/js/material.min.js',
@@ -66,14 +70,16 @@ self.addEventListener('fetch', function(event) {
   
   if (event.request.url.includes(url)) {
     event.respondWith(
-      caches.open(CACHE_DYNAMIC_NAME)
-        .then(function (cache) {
-          return fetch(event.request)
-            .then(function(res) {
-              // trimCache(CACHE_DYNAMIC_NAME, 3);
-              cache.put(event.request, res.clone());
-              return res;
-            });
+      fetch(event.request)
+        .then(function(res) {
+          const clonedRes = res.clone();
+          clonedRes.json()
+            .then(data => {
+              for (let key in data) {
+                writeToIndexedDB('posts', data[key]);
+              }
+            })
+          return res;
         })
     )
   } else if (STATIC_FILES.includes(event.request.url)) {
