@@ -29,3 +29,16 @@ function clearIndexedDBData(storeName) {
     return transaction.complete;  
   })
 }
+
+function deleteIndexedDBData(storeName, id) {
+  return dbPromise
+    .then(db => {
+      const transaction = db.transaction(storeName, 'readwrite');
+      const store = transaction.objectStore(storeName);
+      store.delete(id);
+      return transaction.complete;  
+    })
+    .then(() => {
+      console.log('Item deleted from IndexedDB');
+    })
+}
