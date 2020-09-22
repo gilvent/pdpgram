@@ -10,7 +10,7 @@ function writeToIndexedDB(storeName, data) {
     let store = transaction.objectStore(storeName);
     store.put(data);
     return transaction.complete;
-  })
+  });
 }
 
 function readFromIndexedDB(storeName) {
@@ -18,5 +18,14 @@ function readFromIndexedDB(storeName) {
     const transaction = db.transaction(storeName, 'readonly');
     const store = transaction.objectStore(storeName);
     return store.getAll();
+  });
+}
+
+function clearIndexedDBData(storeName) {
+  return dbPromise.then(db => {
+    const transaction = db.transaction(storeName, 'readwrite');
+    const store = transaction.objectStore(storeName);
+    store.clear();
+    return transaction.complete;  
   })
 }

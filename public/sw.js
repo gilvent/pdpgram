@@ -1,7 +1,7 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/utility.js');
 
-let CACHE_STATIC_NAME = 'static-v17';
+let CACHE_STATIC_NAME = 'static-v18';
 let CACHE_DYNAMIC_NAME = 'dynamic-v2';
 let STATIC_FILES = [
   '/',
@@ -73,12 +73,15 @@ self.addEventListener('fetch', function(event) {
       fetch(event.request)
         .then(function(res) {
           const clonedRes = res.clone();
-          clonedRes.json()
+          clearIndexedDBData('posts')
+            .then(() => {
+              return clonedRes.json();
+            })
             .then(data => {
               for (let key in data) {
                 writeToIndexedDB('posts', data[key]);
               }
-            })
+            });
           return res;
         })
     )
