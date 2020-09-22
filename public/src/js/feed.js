@@ -108,20 +108,12 @@ fetch(url)
   });
 
 
-if ('caches' in window) {
-  caches.match(url)
-    .then(function(response) {
-      if (response) {
-        return response.json();
-      }
-    })
-    .then(function(data) {
-      console.log('From cache', data);
+if ('indexedDB' in window) {
+  readFromIndexedDB('posts')
+    .then(data => {
       if (!isFetchedNetworkData) {
-        const dataArray = Object.keys(data).reduce((arr, dataKey) => {
-          return [...arr, data[dataKey]];
-        }, []);
-        updateUI(dataArray);
+        console.log('From cache', data);
+        updateUI(data);
       }
     })
 }
