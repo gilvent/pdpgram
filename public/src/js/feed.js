@@ -129,10 +129,10 @@ if ('indexedDB' in window) {
 
 form.addEventListener('submit', function(event) {
   event.preventDefault();
-  const title = titleInput.value.trim();
-  const location = locationInput.value.trim();
+  const title = titleInput.value;
+  const location = locationInput.value;
   
-  if (title === '' || location === '') {
+  if (title.trim() === '' || location.trim() === '') {
     alert('Please fill title and location');
     return;
   }
@@ -142,7 +142,22 @@ form.addEventListener('submit', function(event) {
   if ('serviceWorker' in navigator && 'SyncManager' in window) {
     navigator.serviceWorker.ready
       .then(function(sw) {
-        sw.sync.register('sync-new-post');
+        let post = {
+          id: new Date().toISOString(),
+          title,
+          location
+        };
+        writeToIndexedDB('sync-posts', post)
+          .then(function() {
+            sw.sync.register('sync-new-post');
+          })
+          .then(function() {
+            let snackbarContainer= document.querySelector('#confirmation-toast');
+            let data = { message: 'Your post was saved for syncing!' };
+            snackbarContainer.MaterialSnackbar.showSnackbar(data);
+          }).catch(function(err) {
+            console.log(err);
+          });
       });
   }
 })
