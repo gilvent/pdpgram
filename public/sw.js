@@ -163,3 +163,36 @@ self.addEventListener('fetch', function(event) {
 //       })
 //   );
 // });
+
+self.addEventListener('sync', function(event) {
+  console.log('[Service Worker] Background Syncing', event);
+  if (event.tag === 'sync-new-posts') {
+    console.log('[Service Worker] Syncing new posts');
+    event.waitUntil(
+      readFromIndexedDB('sync-posts')
+        .then(function(data) {
+          for (let dt of data) {
+            fetch('https://pdpgram.firebaseio.com/posts.json', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              },
+              body: JSON.stringify({
+                id: dt.id,
+                title: dt.title,
+                location: dt.location,
+                image: dt.image
+              })
+            }).then(function(res) {
+              if (res.ok) {
+                deleteIndexedDBData('sync-posts', dt.id);
+              }
+            }).catch(function(err) {
+              console.log('Error while saving post to server', err);
+            })
+          }
+        })
+    )
+  }
+})

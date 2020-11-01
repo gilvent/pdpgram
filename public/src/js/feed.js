@@ -127,26 +127,18 @@ if ('indexedDB' in window) {
     })
 }
 
-function savePostData() {
-  let dummyImage = 'https://firebasestorage.googleapis.com/v0/b/pdpgram.appspot.com/o/Merdeka_Square_Monas_02.jpg?alt=media&token=e40326cb-2bba-4290-aa7b-cc8062d63aa4';
-
+function savePostData(data) {
   fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json'
     },
-    body: JSON.stringify({
-      id: new Date().toISOString(),
-      title: titleInput.value,
-      location: locationInput.value,
-      image: dummyImage
-    })
+    body: JSON.stringify(data)
+  }).then(function(res) {
+    console.log('Sent data', res);
+    updateUI()
   })
-    .then(function(res) {
-      console.log('Sent data', res);
-      updateUI()
-    })
 }
 
 form.addEventListener('submit', function(event) {
@@ -161,17 +153,21 @@ form.addEventListener('submit', function(event) {
   
   closeCreatePostModal();
 
+  let dummyImage = 'https://firebasestorage.googleapis.com/v0/b/pdpgram.appspot.com/o/Merdeka_Square_Monas_02.jpg?alt=media&token=e40326cb-2bba-4290-aa7b-cc8062d63aa4';
+  let post = {
+    id: new Date().toISOString(),
+    title,
+    location,
+    image: dummyImage
+  };
+
   if ('serviceWorker' in navigator && 'SyncManager' in window) {
     navigator.serviceWorker.ready
       .then(function(sw) {
-        let post = {
-          id: new Date().toISOString(),
-          title,
-          location
-        };
+
         writeToIndexedDB('sync-posts', post)
           .then(function() {
-            sw.sync.register('sync-new-post');
+            sw.sync.register('sync-new-posts');
           })
           .then(function() {
             let snackbarContainer= document.querySelector('#confirmation-toast');
@@ -182,7 +178,7 @@ form.addEventListener('submit', function(event) {
           });
       });
   } else {
-    savePostData()
+    savePostData(post)
   }
 })
 
