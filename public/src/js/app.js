@@ -31,7 +31,21 @@ function displayConfirmNotif() {
       dir: 'ltr',
       lang: 'en-US',
       vibrate: [100, 50, 200],
-      badge: '/src/images/icons/app-icon-96x96.png'
+      badge: '/src/images/icons/app-icon-96x96.png',
+      tag: 'confirmation-notification',
+      renotify: true,
+      actions: [
+        {
+          action: 'confirm',
+          title: 'Okay',
+          icon: '/src/images/icons/app-icon-96x96.png'
+        },
+        {
+          action: 'cancel',
+          title: 'Cancel',
+          icon: '/src/images/icons/app-icon-96x96.png'
+        }
+      ]
     };
     navigator.serviceWorker.ready
       .then(function(swRegistration) {
