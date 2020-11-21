@@ -23,10 +23,15 @@ window.addEventListener('beforeinstallprompt', function(event) {
 })
 
 function displayConfirmNotif() {
-  const options = {
-    body: 'You have subscribed to PDPgram!'
-  };
-  new Notification('Successfully subscribed', options);
+  if ('serviceWorker' in navigator) {
+    const options = {
+      body: 'You have subscribed to PDPgram!'
+    };
+    navigator.serviceWorker.ready
+      .then(function(swRegistration) {
+        swRegistration.showNotification('Successfully subscribed!', options);
+      })
+  }
 }
 
 function askForNotifPermission() {
