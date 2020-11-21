@@ -1,4 +1,5 @@
-var deferredPrompt;
+let deferredPrompt;
+let enableNotifButtons = document.querySelectorAll('.enable-notifications');
 
 if(!window.Promise) {
   window.Promise = Promise;
@@ -20,3 +21,28 @@ window.addEventListener('beforeinstallprompt', function(event) {
   deferredPrompt = event;
   return false;
 })
+
+function displayConfirmNotif() {
+  const options = {
+    body: 'You have subscribed to PDPgram!'
+  };
+  new Notification('Successfully subscribed', options);
+}
+
+function askForNotifPermission() {
+  Notification.requestPermission(function(result) {
+    console.log('User choice', result);
+    if (result !== 'granted') {
+      console.log('No notification permission granted');
+    } else {
+      displayConfirmNotif()
+    }
+  })
+}
+
+if ('Notification' in window) {
+  for (let button of enableNotifButtons) {
+    button.style.display = 'inline-block';
+    button.addEventListener('click', askForNotifPermission);
+  }
+}
