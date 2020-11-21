@@ -54,18 +54,36 @@ function displayConfirmNotif() {
   }
 }
 
+function setupPushSubscription() {
+  let reg;
+  navigator.serviceWorker.ready
+    .then(function(swRegistration) {
+      reg = swRegistration;
+      return swRegistration.pushManager.getSubscription();
+    })
+    .then(function(sub) {
+      if (!sub) {
+        reg.pushManager.subscribe({
+          userVisibleOnly: true
+        });
+      } else {
+
+      }
+    });
+}
+
 function askForNotifPermission() {
   Notification.requestPermission(function(result) {
     console.log('User choice', result);
     if (result !== 'granted') {
       console.log('No notification permission granted');
     } else {
-      displayConfirmNotif()
+      setupPushSubscription()
     }
   })
 }
 
-if ('Notification' in window) {
+if ('Notification' in window && 'serviceWorker' in navigator) {
   for (let button of enableNotifButtons) {
     button.style.display = 'inline-block';
     button.addEventListener('click', askForNotifPermission);
