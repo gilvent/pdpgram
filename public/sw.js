@@ -166,13 +166,16 @@ self.addEventListener('fetch', function(event) {
 
 self.addEventListener('sync', function(event) {
   console.log('[Service Worker] Background Syncing', event);
+
+  const storePostUrl = 'https://us-central1-pdpgram.cloudfunctions.net/storePost'
+
   if (event.tag === 'sync-new-posts') {
     console.log('[Service Worker] Syncing new posts');
     event.waitUntil(
       readFromIndexedDB('sync-posts')
         .then(function(data) {
           for (let dt of data) {
-            fetch('https://pdpgram.firebaseio.com/posts.json', {
+            fetch(storePostUrl, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
