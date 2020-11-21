@@ -25,7 +25,13 @@ window.addEventListener('beforeinstallprompt', function(event) {
 function displayConfirmNotif() {
   if ('serviceWorker' in navigator) {
     const options = {
-      body: 'You have subscribed to PDPgram!'
+      body: 'You have subscribed to PDPgram!',
+      icon: '/src/images/icons/app-icon-96x96.png',
+      image: '/src/images/sf-boat.jpg',
+      dir: 'ltr',
+      lang: 'en-US',
+      vibrate: [100, 50, 200],
+      badge: '/src/images/icons/app-icon-96x96.png'
     };
     navigator.serviceWorker.ready
       .then(function(swRegistration) {
