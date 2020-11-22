@@ -22,7 +22,7 @@ window.addEventListener('beforeinstallprompt', function(event) {
   return false;
 })
 
-function displayConfirmNotif() {
+function displayConfirmNotification() {
   if ('serviceWorker' in navigator) {
     const options = {
       body: 'You have subscribed to PDPgram!',
@@ -55,7 +55,12 @@ function displayConfirmNotif() {
 }
 
 function setupPushSubscription() {
+  // private and public key generated using web-push package
+  const vapidPublicKey = 'BKVTd2I14_4ucLgG20XcvnT2JxhUbs2CJuMQFEyaD3DJLbnNrdpthAtJtaQr1X2h9KzIRRpUDCCeGczlTxtRHC8';
+  const publicKeyInUint8 = urlBase64ToUint8Array(vapidPublicKey);
+  const subscriptionsUrl = 'https://pdpgram.firebaseio.com/subscriptions.json';
   let reg;
+
   navigator.serviceWorker.ready
     .then(function(swRegistration) {
       reg = swRegistration;
@@ -63,12 +68,29 @@ function setupPushSubscription() {
     })
     .then(function(sub) {
       if (!sub) {
-        reg.pushManager.subscribe({
-          userVisibleOnly: true
+        return reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: publicKeyInUint8
         });
-      } else {
-
       }
+    })
+    .then(function(newSub) {
+      return fetch(subscriptionsUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(newSub)
+      })
+    })
+    .then(function(res) {
+      if (res.ok) {
+        displayConfirmNotification();
+      }
+    })
+    .catch(function(err) {
+      console.log(err)
     });
 }
 
