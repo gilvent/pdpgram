@@ -209,9 +209,25 @@ self.addEventListener('notificationclick', function(event) {
   if (action === 'confirm') {
     console.log('Confirm clicked');
   } else {
+    event.waitUntil(
+      clients.matchAll()
+        .then(function(clients) {
+          const client = clients.find(function(c) {
+            return c.visibilityState === 'visible';
+          });
+          const pdpgramUrl = 'http://localhost:8085';
+          
+          if (client) {
+            client.navigate(pdpgramUrl);
+            client.focus();
+          } else {
+            clients.openWindow(pdpgramUrl);
+          }
+          notification.close();
+        })
+    );
     console.log(action);
   }
-  notification.close();
 })
 
 self.addEventListener('notificationclose', function(event) {
