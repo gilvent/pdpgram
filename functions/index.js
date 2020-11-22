@@ -32,7 +32,11 @@ exports.storePost = functions.https.onRequest((request, response) => {
       })
       .then(function (subscriptions) {
         subscriptions.forEach(function (sub) {
-          webPush.sendNotification(sub.val(), JSON.stringify({ title: 'New Post', content: 'New post added!'}))
+          webPush.sendNotification(sub.val(), JSON.stringify({
+            title: 'New Post',
+            content: 'New post added!',
+            openUrl: '/help'
+          }))
             .catch(function (err) {
               functions.logger.error('Fail to send notification', {
                 subscription: sub.val(),
