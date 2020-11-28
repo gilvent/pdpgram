@@ -10,6 +10,7 @@ var canvasElement = document.querySelector('#canvas');
 var captureButton = document.querySelector('#capture-btn');
 var imagePicker = document.querySelector('#image-picker');
 var imagePickerArea = document.querySelector('#pick-image');
+var capturedPicture;
 
 function initializeMedia() {
   if (!('mediaDevices' in navigator)) {
@@ -49,6 +50,7 @@ captureButton.addEventListener('click', function(event) {
   videoPlayer.srcObject.getVideoTracks().forEach(function(track) {
     track.stop();
   });
+  capturedPicture = dataURItoBlob(canvasElement.toDataURL());
 });
 
 function openCreatePostModal() {
@@ -177,13 +179,15 @@ if ('indexedDB' in window) {
 }
 
 function savePostData(data) {
+  let formData = new FormData();
+  formData.append('id', data.id);
+  formData.append('title', data.title);
+  formData.append('location', data.location);
+  formData.append('file', data.picture, dt.id + '.png');
+
   fetch(url, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    },
-    body: JSON.stringify(data)
+    body: formData
   }).then(function(res) {
     console.log('Sent data', res);
     updateUI()
@@ -202,12 +206,11 @@ form.addEventListener('submit', function(event) {
   
   closeCreatePostModal();
 
-  let dummyImage = 'https://firebasestorage.googleapis.com/v0/b/pdpgram.appspot.com/o/Merdeka_Square_Monas_02.jpg?alt=media&token=e40326cb-2bba-4290-aa7b-cc8062d63aa4';
   let post = {
     id: new Date().toISOString(),
     title,
     location,
-    image: dummyImage
+    picture: capturedPicture
   };
 
   if ('serviceWorker' in navigator && 'SyncManager' in window) {

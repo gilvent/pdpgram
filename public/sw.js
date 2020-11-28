@@ -175,18 +175,15 @@ self.addEventListener('sync', function(event) {
       readFromIndexedDB('sync-posts')
         .then(function(data) {
           for (let dt of data) {
+            let formData = new FormData();
+            formData.append('id', dt.id);
+            formData.append('title', dt.title);
+            formData.append('location', dt.location);
+            formData.append('file', dt.picture, dt.id + '.png');
+
             fetch(storePostUrl, {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-              },
-              body: JSON.stringify({
-                id: dt.id,
-                title: dt.title,
-                location: dt.location,
-                image: dt.image
-              })
+              body: formData
             }).then(function(res) {
               if (res.ok) {
                 deleteIndexedDBData('sync-posts', dt.id);
