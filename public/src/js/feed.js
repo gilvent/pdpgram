@@ -139,7 +139,7 @@ function closeCreatePostModal() {
   locationBtn.style.display = 'inline';
   locationLoader.style.display = 'none';
   if (videoPlayer.srcObject) {
-    videoPlayer.srcObject.getVideoTracks().getVideoTracks().forEach(function(track) {
+    videoPlayer.srcObject.getVideoTracks().forEach(function(track) {
       track.stop();
     });
   }
