@@ -53,6 +53,10 @@ captureButton.addEventListener('click', function(event) {
   capturedPicture = dataURItoBlob(canvasElement.toDataURL());
 });
 
+imagePicker.addEventListener('change', function(event) {
+  capturedPicture = event.target.files[0];
+});
+
 function openCreatePostModal() {
   createPostArea.style.display = 'block';
   setTimeout(() => {
