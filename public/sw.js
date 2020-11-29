@@ -1,7 +1,7 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/utility.js');
 
-let CACHE_STATIC_NAME = 'static-v29';
+let CACHE_STATIC_NAME = 'static-v32';
 let CACHE_DYNAMIC_NAME = 'dynamic-v3';
 let STATIC_FILES = [
   '/',
@@ -180,6 +180,8 @@ self.addEventListener('sync', function(event) {
             formData.append('title', dt.title);
             formData.append('location', dt.location);
             formData.append('file', dt.picture, dt.id + '.png');
+            formData.append('rawLocationLat', dt.rawLocation.lat);
+            formData.append('rawLocationLng', dt.rawLocation.lng);
 
             fetch(storePostUrl, {
               method: 'POST',

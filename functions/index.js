@@ -75,7 +75,11 @@ exports.storePost = functions.https.onRequest((request, response) => {
                 id: fields.id,
                 title: fields.title,
                 location: fields.location,
-                image: imageUrl
+                image: imageUrl,
+                rawLocation: {
+                  lat: fields.rawLocationLat,
+                  lng: fields.rawLocationLng
+                }
               })
               .then(function() {
                 webPush.setVapidDetails(

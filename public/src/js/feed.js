@@ -11,6 +11,46 @@ var captureButton = document.querySelector('#capture-btn');
 var imagePicker = document.querySelector('#image-picker');
 var imagePickerArea = document.querySelector('#pick-image');
 var capturedPicture;
+var locationBtn = document.querySelector('#location-btn');
+var locationLoader = document.querySelector('#location-loader');
+var fetchedLocation = null;
+
+locationBtn.addEventListener('click', function(event) {
+  if (!('geolocation' in navigator)) {
+    return;
+  }
+  locationBtn.style.display = 'none';
+  locationLoader.style.display = 'block';
+
+  navigator.geolocation.getCurrentPosition(
+    function(position) {
+      locationBtn.style.display = 'inline';
+      locationLoader.style.display = 'none';
+      fetchedLocation = {
+        lat: position.coords.latitude,
+        lng: 0
+      };
+      locationInput.value = 'In Munich';
+      document.querySelector('#manual-location').classList.add('is-focused');
+    },
+    function(err) {
+      console.log(err);
+      locationBtn.style.display = 'inline';
+      locationLoader.style.display = 'none';
+      alert('Couldnt get your location, you can enter manually');
+      fetchedLocation = { lat: null, lng: null};
+    },
+    {
+      timeout: 7000
+    }
+  );
+});
+
+function initializeLocation() {
+  if (!('geolocation' in navigator)) {
+    locationBtn.style.display = 'none';
+  }
+}
 
 function initializeMedia() {
   if (!('mediaDevices' in navigator)) {
@@ -62,6 +102,7 @@ function openCreatePostModal() {
   setTimeout(() => {
     createPostArea.style.transform = 'translateY(0)';
     initializeMedia();
+    initializeLocation();
   }, 1);
   
   if (deferredPrompt) {
@@ -95,6 +136,13 @@ function closeCreatePostModal() {
   imagePickerArea.style.display = 'none';
   videoPlayer.style.display = 'none';
   canvasElement.style.display = 'none';
+  locationBtn.style.display = 'inline';
+  locationLoader.style.display = 'none';
+  if (videoPlayer.srcObject) {
+    videoPlayer.srcObject.getVideoTracks().getVideoTracks().forEach(function(track) {
+      track.stop();
+    });
+  }
   setTimeout(() => {
     createPostArea.style.display = 'none';
   }, 300)
@@ -188,6 +236,8 @@ function savePostData(data) {
   formData.append('title', data.title);
   formData.append('location', data.location);
   formData.append('file', data.picture, dt.id + '.png');
+  formData.append('rawLocationLat', data.rawLocation.lat);
+  formData.append('rawLocationLng', data.rawLocation.lng);
 
   fetch(url, {
     method: 'POST',
@@ -214,7 +264,8 @@ form.addEventListener('submit', function(event) {
     id: new Date().toISOString(),
     title,
     location,
-    picture: capturedPicture
+    picture: capturedPicture,
+    rawLocation: fetchedLocation
   };
 
   if ('serviceWorker' in navigator && 'SyncManager' in window) {
