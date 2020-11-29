@@ -13,7 +13,7 @@ var imagePickerArea = document.querySelector('#pick-image');
 var capturedPicture;
 var locationBtn = document.querySelector('#location-btn');
 var locationLoader = document.querySelector('#location-loader');
-var fetchedLocation = null;
+var fetchedLocation = { lat: 0, lng: 0};
 
 locationBtn.addEventListener('click', function(event) {
   if (!('geolocation' in navigator)) {
@@ -38,7 +38,7 @@ locationBtn.addEventListener('click', function(event) {
       locationBtn.style.display = 'inline';
       locationLoader.style.display = 'none';
       alert('Couldnt get your location, you can enter manually');
-      fetchedLocation = { lat: null, lng: null};
+      fetchedLocation = { lat: 0, lng: 0};
     },
     {
       timeout: 7000
@@ -101,10 +101,9 @@ function openCreatePostModal() {
   createPostArea.style.display = 'block';
   setTimeout(() => {
     createPostArea.style.transform = 'translateY(0)';
-    initializeMedia();
-    initializeLocation();
   }, 1);
-  
+  initializeMedia();
+  initializeLocation();
   if (deferredPrompt) {
     deferredPrompt.prompt();
 
@@ -132,20 +131,20 @@ function openCreatePostModal() {
 }
 
 function closeCreatePostModal() {
-  createPostArea.style.transform = 'translateY(100vh)';
   imagePickerArea.style.display = 'none';
   videoPlayer.style.display = 'none';
   canvasElement.style.display = 'none';
   locationBtn.style.display = 'inline';
   locationLoader.style.display = 'none';
+  captureButton.style.display = 'inline';
   if (videoPlayer.srcObject) {
     videoPlayer.srcObject.getVideoTracks().forEach(function(track) {
       track.stop();
     });
   }
-  setTimeout(() => {
-    createPostArea.style.display = 'none';
-  }, 300)
+  setTimeout(function() {
+    createPostArea.style.transform = 'translateY(100vh)';
+  }, 1);
 }
 
 shareImageButton.addEventListener('click', openCreatePostModal);
