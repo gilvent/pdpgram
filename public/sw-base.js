@@ -1,26 +1,37 @@
 importScripts('/lib/workbox-v5.1.4/workbox-sw.js');
 
-workbox.setConfig({modulePathPrefix: '/lib/workbox-v5.1.4/'})
+workbox.setConfig({modulePathPrefix: '/lib/workbox-v5.1.4/'});
+
+const StaleWhileRevalidate = workbox.strategies.StaleWhileRevalidate;
+const ExpirationPlugin = workbox.expiration.ExpirationPlugin;
 
 workbox.routing.registerRoute(
   new RegExp(/.*(?:firebasestorage\.googleapis)\.com.*$/),
-  new workbox.strategies.StaleWhileRevalidate({
+  new StaleWhileRevalidate({
     cacheName: 'post-images'
   })
 )
 
 workbox.routing.registerRoute(
   new RegExp(/.*(?:googleapis|gstatic)\.com.*$/),
-  new workbox.strategies.StaleWhileRevalidate({
-    cacheName: 'google-fonts'
+  new StaleWhileRevalidate({
+    cacheName: 'google-fonts',
+    plugins: [
+      new ExpirationPlugin({
+        // Only cache requests for a month
+        maxAgeSeconds: 30 * 24 * 60 * 60,
+        // Only cache 3 requests.
+        maxEntries: 3,
+      })
+    ]
   })
-)
+);
 
 workbox.routing.registerRoute(
   'https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css',
-  new workbox.strategies.StaleWhileRevalidate({
+  new StaleWhileRevalidate({
     cacheName: 'material-css'
   })
-)
+);
 
-workbox.precaching.precacheAndRoute(self.__WB_MANIFEST)
+workbox.precaching.precacheAndRoute(self.__WB_MANIFEST);
