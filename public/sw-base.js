@@ -1,3 +1,5 @@
+importScripts('/src/js/idb.js');
+importScripts('/src/js/utility.js');
 importScripts('/lib/workbox-v5.1.4/workbox-sw.js');
 
 workbox.setConfig({modulePathPrefix: '/lib/workbox-v5.1.4/'});
@@ -33,5 +35,26 @@ workbox.routing.registerRoute(
     cacheName: 'material-css'
   })
 );
+
+// use custom handler to store posts to indexed db
+workbox.routing.registerRoute(
+  'https://pdpgram.firebaseio.com/posts.json',
+  async ({url, request, event, params}) => {
+    return fetch(request)
+      .then(function(res) {
+        const clonedRes = res.clone();
+        clearIndexedDBData('posts')
+          .then(() => {
+            return clonedRes.json();
+          })
+          .then(data => {
+            for (let key in data) {
+              writeToIndexedDB('posts', data[key]);
+            }
+          });
+        return res;
+      })
+  }
+)
 
 workbox.precaching.precacheAndRoute(self.__WB_MANIFEST);
