@@ -57,4 +57,35 @@ workbox.routing.registerRoute(
   }
 )
 
+// display fallback offline.html if failing to get any html file
+workbox.routing.registerRoute(
+  ({ url, request, event }) => {
+    return request.headers.get('Accept').includes('text/html');
+  },
+  async ({ url, request, event, params }) => {
+    return caches.match(request)
+      .then(function(response) {
+        if (response) {
+          return response;
+        } else {
+          return fetch(request)
+            .then(function(res) {
+              return caches.open('dynamic')
+                .then(function(cache) {
+                  cache.put(request.url, res.clone());
+                  return res;
+                })
+            })
+            .catch(function(err) {
+              const cacheKey = workbox.precaching.getCacheKeyForURL('/offline.html')
+              return caches.match(cacheKey)
+                .then(function(res) {
+                  return res;
+                })
+            });
+        }
+      })
+  }
+)
+
 workbox.precaching.precacheAndRoute(self.__WB_MANIFEST);
