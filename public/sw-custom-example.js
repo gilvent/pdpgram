@@ -164,6 +164,9 @@ self.addEventListener('fetch', function(event) {
 //   );
 // });
 
+/**
+ * Background sync and push notification
+ */
 self.addEventListener('sync', function(event) {
   console.log('[Service Worker] Background Syncing', event);
 
