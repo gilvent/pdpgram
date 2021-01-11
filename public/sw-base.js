@@ -36,7 +36,9 @@ workbox.routing.registerRoute(
   })
 );
 
-// use custom handler to store posts to indexed db
+/**
+ * Use custom handler to store posts to indexed db
+ */
 workbox.routing.registerRoute(
   'https://pdpgram.firebaseio.com/posts.json',
   async ({url, request, event, params}) => {
@@ -57,7 +59,9 @@ workbox.routing.registerRoute(
   }
 )
 
-// display fallback offline.html if failing to get any html file
+/** 
+ * Display fallback offline.html if failing to get any html file
+ */
 workbox.routing.registerRoute(
   ({ url, request, event }) => {
     return request.headers.get('Accept').includes('text/html');
@@ -88,4 +92,104 @@ workbox.routing.registerRoute(
   }
 )
 
+/**
+ * Precache routes based on workbox-config
+ */
 workbox.precaching.precacheAndRoute(self.__WB_MANIFEST);
+
+
+/**
+ * Use custom implementation for background sync and push notification
+ */
+self.addEventListener('sync', function(event) {
+  console.log('[Service Worker] Background Syncing', event);
+
+  const storePostUrl = 'https://us-central1-pdpgram.cloudfunctions.net/storePost'
+
+  if (event.tag === 'sync-new-posts') {
+    console.log('[Service Worker] Syncing new posts');
+    event.waitUntil(
+      readFromIndexedDB('sync-posts')
+        .then(function(data) {
+          for (let dt of data) {
+            let formData = new FormData();
+            formData.append('id', dt.id);
+            formData.append('title', dt.title);
+            formData.append('location', dt.location);
+            formData.append('file', dt.picture, dt.id + '.png');
+            formData.append('rawLocationLat', dt.rawLocation.lat);
+            formData.append('rawLocationLng', dt.rawLocation.lng);
+
+            fetch(storePostUrl, {
+              method: 'POST',
+              body: formData
+            }).then(function(res) {
+              if (res.ok) {
+                deleteIndexedDBData('sync-posts', dt.id);
+              }
+            }).catch(function(err) {
+              console.log('Error while saving post to server', err);
+            })
+          }
+        })
+    )
+  }
+})
+
+self.addEventListener('notificationclick', function(event) {
+  const notification = event.notification;
+  const action = event.action;
+
+  console.log(notification);
+
+  if (action === 'confirm') {
+    console.log('Confirm clicked');
+  } else {
+    event.waitUntil(
+      clients.matchAll()
+        .then(function(clients) {
+          const client = clients.find(function(c) {
+            return c.visibilityState === 'visible';
+          });
+          
+          if (client) {
+            client.navigate(notification.data.url);
+            client.focus();
+          } else {
+            clients.openWindow(notification.data.url);
+          }
+          notification.close();
+        })
+    );
+    console.log(action);
+  }
+})
+
+self.addEventListener('notificationclose', function(event) {
+  console.log(event);
+})
+
+self.addEventListener('push', function(event) {
+  console.log('Push notification received', event);
+  let data = {
+    title: 'New!',
+    content: 'Something new happened!',
+    url: '/'
+  };
+  if (event.data) {
+    data = JSON.parse(event.data.text());
+  }
+
+  const options = {
+    body: data.content,
+    icon: '/src/images/icons/app-icon-96x96.png',
+    badge: '/src/images/icons/app-icon-96x96.png',
+    data: {
+      url: data.openUrl
+    }
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, options)
+  )
+})
