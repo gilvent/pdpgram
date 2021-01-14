@@ -7,7 +7,15 @@
     "start": "http-server -p 8085 -c-1",
     "generate-sw": "workbox generateSw ./workbox-config.js",
     "inject-manifest": "workbox injectManifest ./workbox-config.js",
-    "copy-workbox-lib": "workbox copyLibraries public/lib"
+    "copy-workbox-lib": "workbox copyLibraries public/lib",
+    "minify-app-js": "terser public/src/js/app.js -o public/src/js/app.min.js --compress --mangle",
+    "minify-feed-js": "terser public/src/js/feed.js -o public/src/js/feed.min.js --compress --mangle",
+    "minify-fetch-js": "terser public/src/js/fetch.js -o public/src/js/fetch.min.js --compress --mangle",
+    "minify-idb-js": "terser public/src/js/idb.js -o public/src/js/idb.min.js --compress --mangle",
+    "minify-promise-js": "terser public/src/js/promise.js -o public/src/js/promise.min.js --compress --mangle",
+    "minify-utility-js": "terser public/src/js/utility.js -o public/src/js/utility.min.js --compress --mangle",
+    "minify": "npm run minify-app-js && npm run minify-feed-js && npm run minify-fetch-js && npm run minify-idb-js && npm run minify-promise-js && npm run minify-utility-js",
+    "build": "npm run minify && npm run inject-manifest"
   },
   "keywords": [
     "pwa",
