@@ -13,6 +13,7 @@ module.exports = {
      * Ignore workbox-sw because it is automatically cached
      * Ref: https://developers.google.com/web/tools/workbox/modules/workbox-sw
      */
-    "lib/workbox-v5.1.4" 
+    "lib/workbox-v5.1.4",
+    "404.html"
   ]
 };
